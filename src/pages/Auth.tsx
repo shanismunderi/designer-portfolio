@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { Card } from "@/components/ui/card";
@@ -7,29 +7,33 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { Eye, EyeOff, ArrowLeft } from "lucide-react";
+import { Eye, EyeOff, ArrowLeft, Shield, Lock } from "lucide-react";
 import { z } from "zod";
 
 const authSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  fullName: z.string().optional(),
 });
 
 export default function Auth() {
-  const [isLogin, setIsLogin] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    fullName: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const { signIn, signUp } = useAuth();
+  const { signIn, user, isAdmin } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  // Redirect if already logged in as admin
+  useEffect(() => {
+    if (user && isAdmin) {
+      navigate("/admin");
+    }
+  }, [user, isAdmin, navigate]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -47,52 +51,27 @@ export default function Auth() {
     try {
       authSchema.parse(formData);
 
-      if (isLogin) {
-        const { error } = await signIn(formData.email, formData.password);
-        if (error) {
-          if (error.message.includes("Invalid login credentials")) {
-            toast({
-              title: "Login failed",
-              description: "Invalid email or password. Please try again.",
-              variant: "destructive",
-            });
-          } else {
-            toast({
-              title: "Login failed",
-              description: error.message,
-              variant: "destructive",
-            });
-          }
+      const { error } = await signIn(formData.email, formData.password);
+      if (error) {
+        if (error.message.includes("Invalid login credentials")) {
+          toast({
+            title: "Login failed",
+            description: "Invalid email or password. Please try again.",
+            variant: "destructive",
+          });
         } else {
           toast({
-            title: "Welcome back!",
-            description: "You have successfully logged in.",
+            title: "Login failed",
+            description: error.message,
+            variant: "destructive",
           });
-          navigate("/admin");
         }
       } else {
-        const { error } = await signUp(formData.email, formData.password, formData.fullName);
-        if (error) {
-          if (error.message.includes("User already registered")) {
-            toast({
-              title: "Account exists",
-              description: "An account with this email already exists. Please log in instead.",
-              variant: "destructive",
-            });
-          } else {
-            toast({
-              title: "Sign up failed",
-              description: error.message,
-              variant: "destructive",
-            });
-          }
-        } else {
-          toast({
-            title: "Account created!",
-            description: "You can now log in to your account.",
-          });
-          setIsLogin(true);
-        }
+        toast({
+          title: "Welcome back!",
+          description: "You have successfully logged in.",
+        });
+        navigate("/admin");
       }
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -111,7 +90,13 @@ export default function Auth() {
 
   return (
     <Layout>
-      <section className="pt-32 pb-24 min-h-screen flex items-center">
+      <section className="pt-32 pb-24 min-h-screen flex items-center relative overflow-hidden">
+        {/* Background decorations */}
+        <div className="absolute inset-0 -z-10">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-pulse-soft" />
+          <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-primary/10 rounded-full blur-3xl animate-float" />
+        </div>
+
         <div className="container mx-auto px-6">
           <div className="max-w-md mx-auto">
             <Link
@@ -122,43 +107,30 @@ export default function Auth() {
               Back to Home
             </Link>
 
-            <Card variant="glass" className="p-8">
-              <div className="text-center mb-8">
+            <Card variant="glass" className="p-8 relative overflow-hidden">
+              {/* Decorative corner */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-primary/20 to-transparent rounded-bl-full" />
+              
+              <div className="text-center mb-8 relative">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 border border-primary/20 mb-4">
+                  <Shield className="w-8 h-8 text-primary" />
+                </div>
                 <h1 className="text-3xl font-display font-bold text-foreground">
-                  {isLogin ? "Welcome Back" : "Create Account"}
+                  Admin Login
                 </h1>
                 <p className="text-muted-foreground mt-2">
-                  {isLogin
-                    ? "Sign in to access the admin panel"
-                    : "Sign up to get started"}
+                  Sign in to access the admin panel
                 </p>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {!isLogin && (
-                  <div className="space-y-2">
-                    <Label htmlFor="fullName">Full Name</Label>
-                    <Input
-                      id="fullName"
-                      name="fullName"
-                      placeholder="Your name"
-                      value={formData.fullName}
-                      onChange={handleChange}
-                      className="bg-card/60 border-border/50"
-                    />
-                    {errors.fullName && (
-                      <p className="text-sm text-destructive">{errors.fullName}</p>
-                    )}
-                  </div>
-                )}
-
+              <form onSubmit={handleSubmit} className="space-y-6 relative">
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
                   <Input
                     id="email"
                     name="email"
                     type="email"
-                    placeholder="your@email.com"
+                    placeholder="admin@example.com"
                     value={formData.email}
                     onChange={handleChange}
                     className="bg-card/60 border-border/50"
@@ -196,27 +168,18 @@ export default function Auth() {
                 <Button
                   variant="gold"
                   size="lg"
-                  className="w-full"
+                  className="w-full group"
                   disabled={isLoading}
                 >
-                  {isLoading
-                    ? "Please wait..."
-                    : isLogin
-                    ? "Sign In"
-                    : "Create Account"}
+                  <Lock className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
+                  {isLoading ? "Signing in..." : "Sign In"}
                 </Button>
               </form>
 
-              <div className="mt-6 text-center">
-                <button
-                  type="button"
-                  onClick={() => setIsLogin(!isLogin)}
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                >
-                  {isLogin
-                    ? "Don't have an account? Sign up"
-                    : "Already have an account? Sign in"}
-                </button>
+              <div className="mt-6 pt-6 border-t border-border/50">
+                <p className="text-center text-sm text-muted-foreground">
+                  This login is restricted to administrators only.
+                </p>
               </div>
             </Card>
           </div>
