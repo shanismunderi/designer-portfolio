@@ -1,8 +1,9 @@
 import { Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -16,6 +17,7 @@ export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const { isAdmin } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -60,7 +62,15 @@ export function Navbar() {
           ))}
         </nav>
 
-        <div className="hidden md:block">
+        <div className="hidden md:flex items-center gap-4">
+          {isAdmin && (
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/admin" className="flex items-center gap-2">
+                <Settings size={16} />
+                Admin
+              </Link>
+            </Button>
+          )}
           <Button variant="gold" asChild>
             <Link to="/contact">Let's Talk</Link>
           </Button>
@@ -99,6 +109,16 @@ export function Navbar() {
               {link.label}
             </Link>
           ))}
+          {isAdmin && (
+            <Link
+              to="/admin"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="text-lg font-medium text-primary transition-colors duration-300 py-2 flex items-center gap-2"
+            >
+              <Settings size={20} />
+              Admin Panel
+            </Link>
+          )}
           <Button variant="gold" asChild className="mt-4">
             <Link to="/contact" onClick={() => setIsMobileMenuOpen(false)}>
               Let's Talk
