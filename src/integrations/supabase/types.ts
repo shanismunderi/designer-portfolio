@@ -135,6 +135,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      ensure_user_bootstrap: { Args: never; Returns: undefined }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
