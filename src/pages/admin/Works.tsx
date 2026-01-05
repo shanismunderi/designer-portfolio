@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, X, Upload, GripVertical } from "lucide-react";
+import { Plus, Pencil, Trash2, X, Upload, Image, Layers, PenTool, Palette, Monitor, Camera, FileImage, Star, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Category {
@@ -28,6 +28,15 @@ interface Work {
   sort_order: number;
 }
 
+const workTypes = [
+  { id: "branding", name: "Branding", icon: Palette, color: "from-pink-500 to-rose-500" },
+  { id: "ui-ux", name: "UI/UX Design", icon: Monitor, color: "from-blue-500 to-cyan-500" },
+  { id: "illustration", name: "Illustration", icon: PenTool, color: "from-orange-500 to-amber-500" },
+  { id: "print", name: "Print Design", icon: FileImage, color: "from-green-500 to-emerald-500" },
+  { id: "photo", name: "Photography", icon: Camera, color: "from-purple-500 to-violet-500" },
+  { id: "motion", name: "Motion Graphics", icon: Layers, color: "from-indigo-500 to-purple-500" },
+];
+
 export default function AdminWorks() {
   const [works, setWorks] = useState<Work[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -37,6 +46,8 @@ export default function AdminWorks() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
+  const [selectedType, setSelectedType] = useState<string>("");
+  const [dragActive, setDragActive] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -78,6 +89,7 @@ export default function AdminWorks() {
     setImageFile(null);
     setImagePreview("");
     setEditingWork(null);
+    setSelectedType("");
   };
 
   const openModal = (work?: Work) => {
@@ -102,11 +114,43 @@ export default function AdminWorks() {
     resetForm();
   };
 
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleFile(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handleFile = (file: File) => {
+    if (file.type.startsWith("image/")) {
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    } else {
+      toast({
+        title: "Invalid file type",
+        description: "Please upload an image file.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setImageFile(file);
-      setImagePreview(URL.createObjectURL(file));
+      handleFile(file);
     }
   };
 
@@ -238,17 +282,42 @@ export default function AdminWorks() {
   return (
     <AdminLayout>
       <div className="space-y-8">
-        <div className="flex items-center justify-between">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-display font-bold text-foreground">Portfolio Works</h1>
-            <p className="text-muted-foreground mt-1">Manage your portfolio items</p>
+            <h1 className="text-3xl md:text-4xl font-display font-bold text-foreground flex items-center gap-3">
+              <Sparkles className="text-primary" size={32} />
+              Portfolio Works
+            </h1>
+            <p className="text-muted-foreground mt-2">Manage and showcase your creative projects</p>
           </div>
-          <Button variant="gold" onClick={() => openModal()}>
+          <Button 
+            onClick={() => openModal()}
+            className="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all shadow-lg shadow-primary/25"
+          >
             <Plus size={18} />
-            Add Work
+            Add New Work
           </Button>
         </div>
 
+        {/* Work Type Quick Filters */}
+        <div className="flex flex-wrap gap-3">
+          {workTypes.map((type) => (
+            <button
+              key={type.id}
+              onClick={() => setSelectedType(selectedType === type.id ? "" : type.id)}
+              className={cn(
+                "inline-flex items-center gap-2 px-4 py-2 rounded-xl glass-card transition-all duration-300 hover:-translate-y-1",
+                selectedType === type.id && "border-primary/50 shadow-lg shadow-primary/20"
+              )}
+            >
+              <type.icon size={18} className={cn("bg-gradient-to-r bg-clip-text", type.color)} />
+              <span className="text-sm font-medium">{type.name}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Works Grid */}
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[...Array(6)].map((_, i) => (
@@ -262,9 +331,16 @@ export default function AdminWorks() {
             ))}
           </div>
         ) : works.length === 0 ? (
-          <Card variant="glass" className="p-12 text-center">
-            <p className="text-muted-foreground mb-4">No portfolio works yet.</p>
-            <Button variant="gold" onClick={() => openModal()}>
+          <Card variant="glass" className="p-16 text-center">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl glass-card mb-6">
+              <Image size={40} className="text-muted-foreground" />
+            </div>
+            <h3 className="text-xl font-display font-semibold text-foreground mb-2">No works yet</h3>
+            <p className="text-muted-foreground mb-6">Start building your portfolio by adding your first work.</p>
+            <Button 
+              onClick={() => openModal()}
+              className="bg-gradient-to-r from-primary to-accent hover:opacity-90"
+            >
               <Plus size={18} />
               Add Your First Work
             </Button>
@@ -272,46 +348,60 @@ export default function AdminWorks() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {works.map((work) => (
-              <Card key={work.id} variant="glass" className="overflow-hidden group">
+              <Card key={work.id} variant="glass" className="overflow-hidden group hover-lift">
                 <div className="aspect-square relative overflow-hidden">
                   <img
                     src={work.image_url}
                     alt={work.title}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
-                  <div className="absolute inset-0 bg-background/80 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
-                    <Button size="icon" variant="glass" onClick={() => openModal(work)}>
+                  <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300" />
+                  
+                  {/* Action Buttons */}
+                  <div className="absolute inset-0 flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                    <Button 
+                      size="icon" 
+                      variant="secondary"
+                      className="glass-card hover:border-primary/50"
+                      onClick={() => openModal(work)}
+                    >
                       <Pencil size={18} />
                     </Button>
                     <Button
                       size="icon"
-                      variant="glass"
-                      className="text-destructive hover:text-destructive"
+                      variant="secondary"
+                      className="glass-card hover:border-destructive/50 text-destructive"
                       onClick={() => handleDelete(work.id)}
                     >
                       <Trash2 size={18} />
                     </Button>
                   </div>
+                  
+                  {/* Featured Badge */}
                   {work.is_featured && (
-                    <span className="absolute top-3 right-3 px-2 py-1 bg-primary text-primary-foreground text-xs font-medium rounded">
+                    <span className="absolute top-3 right-3 inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-primary to-accent text-primary-foreground text-xs font-medium rounded-full shadow-lg">
+                      <Star size={12} fill="currentColor" />
                       Featured
                     </span>
                   )}
                 </div>
-                <CardContent className="p-4">
+                <CardContent className="p-5">
                   <div className="flex items-center justify-between">
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-display font-semibold text-foreground truncate">
+                      <h3 className="font-display font-semibold text-foreground truncate text-lg">
                         {work.title}
                       </h3>
                       <p className="text-sm text-muted-foreground">
                         {categories.find((c) => c.id === work.category_id)?.name || "Uncategorized"}
                       </p>
                     </div>
-                    <Switch
-                      checked={work.is_featured}
-                      onCheckedChange={() => toggleFeatured(work.id, work.is_featured)}
-                    />
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-muted-foreground">Featured</span>
+                      <Switch
+                        checked={work.is_featured}
+                        onCheckedChange={() => toggleFeatured(work.id, work.is_featured)}
+                      />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -322,36 +412,55 @@ export default function AdminWorks() {
 
       {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <Card variant="glass" className="w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>{editingWork ? "Edit Work" : "Add New Work"}</CardTitle>
-              <Button size="icon" variant="ghost" onClick={closeModal}>
+        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-xl flex items-center justify-center p-4">
+          <Card variant="glass" className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <CardHeader className="flex flex-row items-center justify-between border-b border-border/50 pb-4">
+              <CardTitle className="flex items-center gap-2">
+                {editingWork ? <Pencil size={20} className="text-primary" /> : <Plus size={20} className="text-primary" />}
+                {editingWork ? "Edit Work" : "Add New Work"}
+              </CardTitle>
+              <Button size="icon" variant="ghost" onClick={closeModal} className="hover:bg-muted">
                 <X size={18} />
               </Button>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Image Upload */}
-                <div className="space-y-2">
-                  <Label>Image</Label>
+                <div className="space-y-3">
+                  <Label className="text-base font-medium">Project Image</Label>
                   <div
+                    onDragEnter={handleDrag}
+                    onDragLeave={handleDrag}
+                    onDragOver={handleDrag}
+                    onDrop={handleDrop}
                     className={cn(
-                      "border-2 border-dashed border-border/50 rounded-lg p-4 text-center cursor-pointer hover:border-primary/50 transition-colors",
-                      imagePreview && "p-0 border-0"
+                      "relative border-2 border-dashed rounded-2xl transition-all duration-300 cursor-pointer overflow-hidden",
+                      dragActive 
+                        ? "border-primary bg-primary/5" 
+                        : "border-border/50 hover:border-primary/50",
+                      imagePreview && "border-0 p-0"
                     )}
                     onClick={() => document.getElementById("image-upload")?.click()}
                   >
                     {imagePreview ? (
-                      <img
-                        src={imagePreview}
-                        alt="Preview"
-                        className="w-full aspect-video object-cover rounded-lg"
-                      />
+                      <div className="relative aspect-video">
+                        <img
+                          src={imagePreview}
+                          alt="Preview"
+                          className="w-full h-full object-cover rounded-2xl"
+                        />
+                        <div className="absolute inset-0 bg-background/50 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center rounded-2xl">
+                          <p className="text-sm font-medium">Click to change</p>
+                        </div>
+                      </div>
                     ) : (
-                      <div className="py-8">
-                        <Upload className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-                        <p className="text-sm text-muted-foreground">Click to upload image</p>
+                      <div className="py-12 text-center">
+                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl glass-card mb-4">
+                          <Upload className="w-8 h-8 text-muted-foreground" />
+                        </div>
+                        <p className="text-foreground font-medium mb-1">Drop your image here</p>
+                        <p className="text-sm text-muted-foreground">or click to browse</p>
+                        <p className="text-xs text-muted-foreground mt-2">PNG, JPG, WEBP up to 10MB</p>
                       </div>
                     )}
                   </div>
@@ -364,15 +473,63 @@ export default function AdminWorks() {
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="title">Title</Label>
-                  <Input
-                    id="title"
-                    value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    className="bg-card/60 border-border/50"
-                    required
-                  />
+                {/* Work Type Selection */}
+                <div className="space-y-3">
+                  <Label className="text-base font-medium">Work Type</Label>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {workTypes.map((type) => (
+                      <button
+                        key={type.id}
+                        type="button"
+                        onClick={() => {
+                          const cat = categories.find(c => c.slug === type.id || c.name.toLowerCase().includes(type.name.toLowerCase()));
+                          if (cat) {
+                            setFormData({ ...formData, category_id: cat.id });
+                          }
+                        }}
+                        className={cn(
+                          "flex items-center gap-2 p-3 rounded-xl glass-card transition-all duration-300 hover:-translate-y-1",
+                          formData.category_id === categories.find(c => c.slug === type.id)?.id && "border-primary/50 shadow-lg shadow-primary/20"
+                        )}
+                      >
+                        <div className={cn("p-2 rounded-lg bg-gradient-to-r", type.color)}>
+                          <type.icon size={16} className="text-white" />
+                        </div>
+                        <span className="text-sm font-medium">{type.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="title">Title</Label>
+                    <Input
+                      id="title"
+                      value={formData.title}
+                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                      className="glass-card border-border/50 focus:border-primary/50"
+                      placeholder="Project name"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="category">Category</Label>
+                    <select
+                      id="category"
+                      value={formData.category_id}
+                      onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
+                      className="w-full h-10 px-3 rounded-xl glass-card border border-border/50 text-foreground focus:border-primary/50 transition-colors"
+                    >
+                      <option value="">Select category</option>
+                      {categories.map((cat) => (
+                        <option key={cat.id} value={cat.id}>
+                          {cat.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
 
                 <div className="space-y-2">
@@ -381,41 +538,30 @@ export default function AdminWorks() {
                     id="description"
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className="bg-card/60 border-border/50 resize-none"
-                    rows={3}
+                    className="glass-card border-border/50 focus:border-primary/50 resize-none min-h-[100px]"
+                    placeholder="Describe your project..."
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="category">Category</Label>
-                  <select
-                    id="category"
-                    value={formData.category_id}
-                    onChange={(e) => setFormData({ ...formData, category_id: e.target.value })}
-                    className="w-full h-10 px-3 rounded-lg bg-card/60 border border-border/50 text-foreground"
-                  >
-                    <option value="">Select a category</option>
-                    {categories.map((cat) => (
-                      <option key={cat.id} value={cat.id}>
-                        {cat.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="tags">Tags (comma-separated)</Label>
+                  <Label htmlFor="tags">Tags</Label>
                   <Input
                     id="tags"
                     value={formData.tags}
                     onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-                    className="bg-card/60 border-border/50"
-                    placeholder="logo, branding, minimal"
+                    className="glass-card border-border/50 focus:border-primary/50"
+                    placeholder="logo, branding, minimal (comma-separated)"
                   />
                 </div>
 
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="featured">Featured</Label>
+                <div className="flex items-center justify-between p-4 rounded-xl glass-card">
+                  <div className="flex items-center gap-3">
+                    <Star size={20} className="text-primary" />
+                    <div>
+                      <Label htmlFor="featured" className="text-base font-medium cursor-pointer">Featured Work</Label>
+                      <p className="text-sm text-muted-foreground">Show this work prominently on your portfolio</p>
+                    </div>
+                  </div>
                   <Switch
                     id="featured"
                     checked={formData.is_featured}
@@ -425,12 +571,16 @@ export default function AdminWorks() {
                   />
                 </div>
 
-                <div className="flex gap-3 pt-4">
-                  <Button type="button" variant="ghost" onClick={closeModal} className="flex-1">
+                <div className="flex gap-3 pt-4 border-t border-border/50">
+                  <Button type="button" variant="outline" onClick={closeModal} className="flex-1 glass-card border-border/50">
                     Cancel
                   </Button>
-                  <Button type="submit" variant="gold" className="flex-1" disabled={isSubmitting}>
-                    {isSubmitting ? "Saving..." : editingWork ? "Update" : "Add Work"}
+                  <Button 
+                    type="submit" 
+                    className="flex-1 bg-gradient-to-r from-primary to-accent hover:opacity-90" 
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? "Saving..." : editingWork ? "Update Work" : "Add Work"}
                   </Button>
                 </div>
               </form>

@@ -1,10 +1,9 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Sparkles, Award, Users } from "lucide-react";
+import { ArrowRight, Sparkles, Award, Users, Camera, Pen, Layers, Palette, PenTool, Monitor } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { SectionHeader } from "@/components/ui/section-header";
-import heroBg from "@/assets/hero-bg.jpg";
 import branding1 from "@/assets/portfolio/branding-1.jpg";
 import social1 from "@/assets/portfolio/social-1.jpg";
 import print1 from "@/assets/portfolio/print-1.jpg";
@@ -23,61 +22,119 @@ const stats = [
   { icon: Sparkles, value: "8+", label: "Years Experience" },
 ];
 
+const designTools = [
+  { icon: Layers, name: "Photoshop", color: "from-blue-500 to-blue-600" },
+  { icon: PenTool, name: "Illustrator", color: "from-orange-500 to-orange-600" },
+  { icon: Palette, name: "InDesign", color: "from-pink-500 to-pink-600" },
+  { icon: Pen, name: "After Effects", color: "from-purple-500 to-purple-600" },
+  { icon: Monitor, name: "Figma", color: "from-green-500 to-green-600" },
+  { icon: Camera, name: "Lightroom", color: "from-cyan-500 to-cyan-600" },
+];
+
 export default function Home() {
   return (
     <Layout>
       {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-        {/* Background */}
+        {/* Animated Background Elements */}
         <div className="absolute inset-0">
-          <img
-            src={heroBg}
-            alt="Abstract geometric art background"
-            className="w-full h-full object-cover opacity-40"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-background/80 to-background" />
+          <div className="absolute top-1/4 -left-32 w-96 h-96 bg-primary/30 rounded-full blur-[120px] animate-pulse-soft" />
+          <div className="absolute top-1/3 -right-32 w-[500px] h-[500px] bg-accent/20 rounded-full blur-[150px] animate-float" />
+          <div className="absolute bottom-1/4 left-1/3 w-72 h-72 bg-primary/20 rounded-full blur-[100px] animate-float-delayed" />
         </div>
 
-        {/* Decorative elements */}
-        <div className="absolute top-1/4 left-10 w-72 h-72 bg-primary/20 rounded-full blur-3xl animate-pulse-soft" />
-        <div className="absolute bottom-1/4 right-10 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-float" />
+        {/* Grid Pattern Overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:60px_60px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_50%,#000_70%,transparent_110%)]" />
 
         {/* Content */}
-        <div className="relative container mx-auto px-6 pt-32 pb-20 text-center">
-          <div className="max-w-4xl mx-auto">
-            <span className="inline-block text-sm font-medium text-primary tracking-wider uppercase mb-6 animate-fade-in">
-              Creative Design Studio
-            </span>
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-display font-bold text-foreground leading-tight mb-8 animate-fade-in" style={{ animationDelay: "0.1s" }}>
-              Crafting{" "}
-              <span className="text-gradient">Visual</span>
-              <br />
-              Experiences
-            </h1>
-            <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto mb-12 animate-fade-in" style={{ animationDelay: "0.2s" }}>
-              Transforming ideas into stunning visual identities that captivate audiences and elevate brands.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in" style={{ animationDelay: "0.3s" }}>
-              <Button variant="hero" asChild>
-                <Link to="/portfolio">
-                  View Portfolio
-                  <ArrowRight size={18} />
-                </Link>
-              </Button>
-              <Button variant="hero-outline" asChild>
-                <Link to="/contact">Let's Talk</Link>
-              </Button>
+        <div className="relative container mx-auto px-6 pt-32 pb-20">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            {/* Left Content */}
+            <div className="text-left">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card mb-8 animate-fade-in">
+                <Sparkles size={16} className="text-primary" />
+                <span className="text-sm font-medium text-foreground">Creative Design Studio</span>
+              </div>
+              
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-display font-bold text-foreground leading-[1.1] mb-8 animate-fade-in" style={{ animationDelay: "0.1s" }}>
+                Crafting{" "}
+                <span className="text-gradient">Digital</span>
+                <br />
+                <span className="text-gradient-secondary">Experiences</span>
+              </h1>
+              
+              <p className="text-lg md:text-xl text-muted-foreground max-w-lg mb-10 animate-fade-in" style={{ animationDelay: "0.2s" }}>
+                I transform ideas into stunning visual identities that captivate audiences and elevate brands to new heights.
+              </p>
+              
+              <div className="flex flex-col sm:flex-row items-start gap-4 animate-fade-in" style={{ animationDelay: "0.3s" }}>
+                <Button size="lg" asChild className="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all duration-300 shadow-lg shadow-primary/25 group">
+                  <Link to="/portfolio" className="flex items-center gap-2">
+                    View Portfolio
+                    <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                </Button>
+                <Button size="lg" variant="outline" asChild className="glass border-border/50 hover:border-primary/50 transition-all">
+                  <Link to="/contact">Let's Talk</Link>
+                </Button>
+              </div>
+
+              {/* Design Tools */}
+              <div className="mt-16 animate-fade-in" style={{ animationDelay: "0.4s" }}>
+                <p className="text-sm text-muted-foreground mb-4">Tools I Master</p>
+                <div className="flex flex-wrap gap-3">
+                  {designTools.map((tool, index) => (
+                    <div
+                      key={tool.name}
+                      className="icon-tool group"
+                      style={{ animationDelay: `${0.5 + index * 0.1}s` }}
+                    >
+                      <tool.icon size={24} className="group-hover:scale-110 transition-transform" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Right Content - Profile Picture Placeholder */}
+            <div className="relative flex justify-center lg:justify-end animate-fade-in" style={{ animationDelay: "0.2s" }}>
+              <div className="relative">
+                {/* Decorative Ring */}
+                <div className="absolute -inset-4 rounded-full bg-gradient-to-r from-primary via-accent to-primary animate-spin-slow opacity-20" />
+                
+                {/* Profile Container */}
+                <div className="relative w-72 h-72 md:w-96 md:h-96 rounded-full glass-card overflow-hidden animate-morph border-2 border-primary/20">
+                  {/* Placeholder for profile picture */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-accent/20 to-primary/20 flex items-center justify-center">
+                    <div className="text-center">
+                      <Camera size={48} className="mx-auto mb-4 text-primary/50" />
+                      <p className="text-muted-foreground text-sm">Your Photo Here</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Floating Elements */}
+                <div className="absolute -top-4 -right-4 w-20 h-20 glass-card rounded-xl flex items-center justify-center animate-float">
+                  <Layers size={32} className="text-blue-500" />
+                </div>
+                <div className="absolute -bottom-4 -left-4 w-20 h-20 glass-card rounded-xl flex items-center justify-center animate-float-delayed">
+                  <PenTool size={32} className="text-orange-500" />
+                </div>
+                <div className="absolute top-1/2 -right-8 w-16 h-16 glass-card rounded-lg flex items-center justify-center animate-float" style={{ animationDelay: "1s" }}>
+                  <Palette size={24} className="text-pink-500" />
+                </div>
+              </div>
             </div>
           </div>
 
           {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-24 max-w-3xl mx-auto animate-fade-in" style={{ animationDelay: "0.4s" }}>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-24 animate-fade-in" style={{ animationDelay: "0.5s" }}>
             {stats.map((stat, index) => (
-              <div key={index} className="text-center">
-                <stat.icon className="w-8 h-8 text-primary mx-auto mb-3" />
-                <p className="text-4xl font-display font-bold text-foreground">{stat.value}</p>
+              <Card key={index} variant="glass" className="p-6 text-center hover-lift hover-glow transition-all duration-500">
+                <stat.icon className="w-10 h-10 text-primary mx-auto mb-4" />
+                <p className="text-4xl md:text-5xl font-display font-bold text-foreground mb-2">{stat.value}</p>
                 <p className="text-muted-foreground">{stat.label}</p>
-              </div>
+              </Card>
             ))}
           </div>
         </div>
@@ -91,8 +148,9 @@ export default function Home() {
       </section>
 
       {/* Featured Works */}
-      <section className="py-24 bg-card/30">
-        <div className="container mx-auto px-6">
+      <section className="py-24 relative">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent" />
+        <div className="container mx-auto px-6 relative">
           <SectionHeader
             label="Portfolio"
             title="Featured Works"
@@ -104,7 +162,7 @@ export default function Home() {
               <Link
                 key={work.id}
                 to="/portfolio"
-                className="group relative overflow-hidden rounded-2xl aspect-[4/3] hover-lift"
+                className="group relative overflow-hidden rounded-2xl aspect-[4/3] hover-lift glass-card"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <img
@@ -123,10 +181,10 @@ export default function Home() {
           </div>
 
           <div className="text-center mt-12">
-            <Button variant="gold" size="lg" asChild>
-              <Link to="/portfolio">
+            <Button size="lg" asChild className="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all group">
+              <Link to="/portfolio" className="flex items-center gap-2">
                 View All Works
-                <ArrowRight size={18} />
+                <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
               </Link>
             </Button>
           </div>
@@ -135,22 +193,26 @@ export default function Home() {
 
       {/* CTA Section */}
       <section className="py-24 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-primary/10" />
-        <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-primary/10 to-transparent" />
+        <div className="absolute inset-0">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/10 rounded-full blur-[200px]" />
+        </div>
         
         <div className="container mx-auto px-6 relative">
-          <Card variant="glass" className="p-12 md:p-16 text-center max-w-4xl mx-auto">
-            <h2 className="text-3xl md:text-5xl font-display font-bold text-foreground mb-6">
+          <Card variant="glass" className="p-12 md:p-16 text-center max-w-4xl mx-auto relative overflow-hidden">
+            <div className="absolute -top-20 -right-20 w-40 h-40 bg-primary/20 rounded-full blur-3xl" />
+            <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-accent/20 rounded-full blur-3xl" />
+            
+            <h2 className="text-3xl md:text-5xl font-display font-bold text-foreground mb-6 relative">
               Ready to Start Your{" "}
               <span className="text-gradient">Project?</span>
             </h2>
-            <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto">
+            <p className="text-xl text-muted-foreground mb-10 max-w-2xl mx-auto relative">
               Let's collaborate to create something extraordinary. Get in touch and let's discuss your vision.
             </p>
-            <Button variant="hero" asChild>
-              <Link to="/contact">
+            <Button size="lg" asChild className="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all group relative">
+              <Link to="/contact" className="flex items-center gap-2">
                 Get in Touch
-                <ArrowRight size={18} />
+                <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
               </Link>
             </Button>
           </Card>
