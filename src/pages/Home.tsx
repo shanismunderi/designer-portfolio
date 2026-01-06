@@ -1,10 +1,9 @@
 import { Link } from "react-router-dom";
-import { ArrowRight, Sparkles, Award, Users, Camera } from "lucide-react";
+import { ArrowRight, Sparkles, Award, Users, Camera, Pen, Layers, Palette, PenTool, Monitor } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { SectionHeader } from "@/components/ui/section-header";
-import { AdobeCarousel } from "@/components/ui/adobe-carousel";
 import branding1 from "@/assets/portfolio/branding-1.jpg";
 import social1 from "@/assets/portfolio/social-1.jpg";
 import print1 from "@/assets/portfolio/print-1.jpg";
@@ -21,6 +20,15 @@ const stats = [
   { icon: Award, value: "150+", label: "Projects Completed" },
   { icon: Users, value: "80+", label: "Happy Clients" },
   { icon: Sparkles, value: "8+", label: "Years Experience" },
+];
+
+const designTools = [
+  { icon: Layers, name: "Photoshop", color: "from-blue-500 to-blue-600" },
+  { icon: PenTool, name: "Illustrator", color: "from-orange-500 to-orange-600" },
+  { icon: Palette, name: "InDesign", color: "from-pink-500 to-pink-600" },
+  { icon: Pen, name: "After Effects", color: "from-purple-500 to-purple-600" },
+  { icon: Monitor, name: "Figma", color: "from-green-500 to-green-600" },
+  { icon: Camera, name: "Lightroom", color: "from-cyan-500 to-cyan-600" },
 ];
 
 export default function Home() {
@@ -71,10 +79,20 @@ export default function Home() {
                 </Button>
               </div>
 
-              {/* Adobe Tools Carousel */}
+              {/* Design Tools */}
               <div className="mt-16 animate-fade-in" style={{ animationDelay: "0.4s" }}>
-                <p className="text-sm text-muted-foreground mb-6">Tools I Master</p>
-                <AdobeCarousel className="max-w-lg" />
+                <p className="text-sm text-muted-foreground mb-4">Tools I Master</p>
+                <div className="flex flex-wrap gap-3">
+                  {designTools.map((tool, index) => (
+                    <div
+                      key={tool.name}
+                      className="icon-tool group"
+                      style={{ animationDelay: `${0.5 + index * 0.1}s` }}
+                    >
+                      <tool.icon size={24} className="group-hover:scale-110 transition-transform" />
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -95,15 +113,15 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* Floating Elements - Adobe Icons */}
-                <div className="absolute -top-4 -right-4 w-20 h-20 rounded-xl bg-gradient-to-br from-[#31A8FF] to-[#001E36] flex items-center justify-center animate-float shadow-lg">
-                  <span className="text-2xl font-bold text-white">Ps</span>
+                {/* Floating Elements */}
+                <div className="absolute -top-4 -right-4 w-20 h-20 glass-card rounded-xl flex items-center justify-center animate-float">
+                  <Layers size={32} className="text-blue-500" />
                 </div>
-                <div className="absolute -bottom-4 -left-4 w-20 h-20 rounded-xl bg-gradient-to-br from-[#FF9A00] to-[#330000] flex items-center justify-center animate-float-delayed shadow-lg">
-                  <span className="text-2xl font-bold text-white">Ai</span>
+                <div className="absolute -bottom-4 -left-4 w-20 h-20 glass-card rounded-xl flex items-center justify-center animate-float-delayed">
+                  <PenTool size={32} className="text-orange-500" />
                 </div>
-                <div className="absolute top-1/2 -right-8 w-16 h-16 rounded-lg bg-gradient-to-br from-[#FF3366] to-[#49021F] flex items-center justify-center animate-float shadow-lg" style={{ animationDelay: "1s" }}>
-                  <span className="text-xl font-bold text-white">Id</span>
+                <div className="absolute top-1/2 -right-8 w-16 h-16 glass-card rounded-lg flex items-center justify-center animate-float" style={{ animationDelay: "1s" }}>
+                  <Palette size={24} className="text-pink-500" />
                 </div>
               </div>
             </div>
