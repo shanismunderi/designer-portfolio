@@ -317,17 +317,16 @@ export default function AdminWorks() {
           ))}
         </div>
 
-        {/* Works Grid */}
+        {/* Works Gallery */}
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <Card key={i} variant="glass" className="overflow-hidden">
-                <div className="aspect-square bg-muted animate-pulse" />
-                <CardContent className="p-4">
-                  <div className="h-6 bg-muted animate-pulse rounded mb-2" />
-                  <div className="h-4 bg-muted animate-pulse rounded w-2/3" />
-                </CardContent>
-              </Card>
+          <div className="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4">
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className="break-inside-avoid">
+                <div 
+                  className="bg-muted/50 animate-pulse rounded-2xl" 
+                  style={{ height: `${200 + (i % 3) * 100}px` }}
+                />
+              </div>
             ))}
           </div>
         ) : works.length === 0 ? (
@@ -346,65 +345,77 @@ export default function AdminWorks() {
             </Button>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4">
             {works.map((work) => (
-              <Card key={work.id} variant="glass" className="overflow-hidden group hover-lift">
-                <div className="aspect-square relative overflow-hidden">
-                  <img
-                    src={work.image_url}
-                    alt={work.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300" />
-                  
-                  {/* Action Buttons */}
-                  <div className="absolute inset-0 flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                    <Button 
-                      size="icon" 
-                      variant="secondary"
-                      className="glass-card hover:border-primary/50"
-                      onClick={() => openModal(work)}
-                    >
-                      <Pencil size={18} />
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="secondary"
-                      className="glass-card hover:border-destructive/50 text-destructive"
-                      onClick={() => handleDelete(work.id)}
-                    >
-                      <Trash2 size={18} />
-                    </Button>
-                  </div>
-                  
-                  {/* Featured Badge */}
-                  {work.is_featured && (
-                    <span className="absolute top-3 right-3 inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-primary to-accent text-primary-foreground text-xs font-medium rounded-full shadow-lg">
-                      <Star size={12} fill="currentColor" />
-                      Featured
-                    </span>
-                  )}
+              <div 
+                key={work.id} 
+                className="break-inside-avoid group relative overflow-hidden rounded-2xl glass-card hover-lift cursor-pointer"
+                onClick={() => openModal(work)}
+              >
+                <img
+                  src={work.image_url}
+                  alt={work.title}
+                  className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+                
+                {/* Overlay on Hover */}
+                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500" />
+                
+                {/* Content Overlay */}
+                <div className="absolute bottom-0 left-0 right-0 p-5 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
+                  <h3 className="font-display font-bold text-foreground text-lg mb-1">
+                    {work.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {categories.find((c) => c.id === work.category_id)?.name || "Uncategorized"}
+                  </p>
                 </div>
-                <CardContent className="p-5">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-display font-semibold text-foreground truncate text-lg">
-                        {work.title}
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        {categories.find((c) => c.id === work.category_id)?.name || "Uncategorized"}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-muted-foreground">Featured</span>
-                      <Switch
-                        checked={work.is_featured}
-                        onCheckedChange={() => toggleFeatured(work.id, work.is_featured)}
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                
+                {/* Action Buttons */}
+                <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
+                  <Button 
+                    size="icon" 
+                    variant="secondary"
+                    className="glass-card hover:border-primary/50 h-9 w-9"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openModal(work);
+                    }}
+                  >
+                    <Pencil size={16} />
+                  </Button>
+                  <Button
+                    size="icon"
+                    variant="secondary"
+                    className="glass-card hover:border-destructive/50 text-destructive h-9 w-9"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(work.id);
+                    }}
+                  >
+                    <Trash2 size={16} />
+                  </Button>
+                </div>
+                
+                {/* Featured Badge */}
+                {work.is_featured && (
+                  <span className="absolute top-3 left-3 inline-flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-primary to-accent text-primary-foreground text-xs font-medium rounded-full shadow-lg">
+                    <Star size={12} fill="currentColor" />
+                    Featured
+                  </span>
+                )}
+                
+                {/* Featured Toggle */}
+                <div 
+                  className="absolute bottom-3 right-3 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Switch
+                    checked={work.is_featured}
+                    onCheckedChange={() => toggleFeatured(work.id, work.is_featured)}
+                  />
+                </div>
+              </div>
             ))}
           </div>
         )}
