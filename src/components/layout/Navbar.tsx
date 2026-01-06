@@ -39,7 +39,7 @@ export function Navbar() {
     >
       <div className="container mx-auto px-6 flex items-center justify-between">
         <Link to="/" className="text-2xl font-display font-bold text-gradient">
-          Studio.
+          Ziyan.
         </Link>
 
         {/* Desktop Navigation */}

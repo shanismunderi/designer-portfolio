@@ -7,7 +7,7 @@ interface AuthContextType {
   session: Session | null;
   isAdmin: boolean;
   isLoading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
+  signIn: (username: string, password: string) => Promise<{ error: Error | null }>;
   signUp: (email: string, password: string, fullName?: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
 }
@@ -27,7 +27,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .eq("user_id", userId)
       .eq("role", "admin")
       .maybeSingle();
-    
+
     if (error) {
       console.error("Error checking admin role:", error);
       return false;
@@ -41,7 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
-        
+
         // Defer admin check to avoid deadlock
         if (session?.user) {
           setTimeout(() => {
@@ -57,7 +57,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
-      
+
       if (session?.user) {
         checkAdminRole(session.user.id).then(setIsAdmin);
       }
@@ -67,17 +67,69 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
+  const signIn = async (username: string, password: string) => {
+    // Mapping username to email for Supabase Auth
+    // The designated admin is 'adminziyan'
+    const email = username.includes("@") ? username : `${username}@ziyan.admin`;
+
+    // First attempt: Normal Sign In
+    let { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
-    return { error: error ? new Error(error.message) : null };
+
+    // If login failed and it's our specific admin account, try to register it
+    // This handles the "change the admin into..." request if the account doesn't exist yet
+    if (error && error.message.includes("Invalid login credentials") && username === "adminziyan" && password === "ziyan@admin") {
+      console.log("Attempting to initialize admin account...");
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: "Admin Ziyan",
+          },
+        },
+      });
+
+      if (!signUpError) {
+        // If sign up worked, try to sign in again (in case auto-login didn't happen)
+        const secondAttempt = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (secondAttempt.error) {
+          if (secondAttempt.error.message.includes("Email not confirmed")) {
+            return { error: new Error("Admin account created! Please check your email to confirm, or disable 'Confirm Email' in Supabase project settings to finish login.") };
+          }
+          return { error: new Error(secondAttempt.error.message) };
+        }
+
+        // Successfully registered and signed in
+        return { error: null };
+      } else {
+        // If sign up failed with "User already registered", then the password must be wrong
+        if (signUpError.message.includes("User already registered")) {
+          return { error: new Error("Invalid username or password.") };
+        }
+        return { error: new Error(signUpError.message) };
+      }
+    }
+
+    if (error) {
+      if (error.message.includes("Email not confirmed")) {
+        return { error: new Error("Please confirm your email address before logging in.") };
+      }
+      return { error: new Error(error.message) };
+    }
+
+    return { error: null };
   };
 
   const signUp = async (email: string, password: string, fullName?: string) => {
     const redirectUrl = `${window.location.origin}/`;
-    
+
     const { error } = await supabase.auth.signUp({
       email,
       password,

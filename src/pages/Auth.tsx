@@ -11,7 +11,7 @@ import { Eye, EyeOff, ArrowLeft, Shield, Lock } from "lucide-react";
 import { z } from "zod";
 
 const authSchema = z.object({
-  email: z.string().email("Please enter a valid email address"),
+  username: z.string().min(3, "Username must be at least 3 characters"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
@@ -19,7 +19,7 @@ export default function Auth() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    email: "",
+    username: "",
     password: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -51,12 +51,12 @@ export default function Auth() {
     try {
       authSchema.parse(formData);
 
-      const { error } = await signIn(formData.email, formData.password);
+      const { error } = await signIn(formData.username, formData.password);
       if (error) {
         if (error.message.includes("Invalid login credentials")) {
           toast({
             title: "Login failed",
-            description: "Invalid email or password. Please try again.",
+            description: "Invalid username or password. Please try again.",
             variant: "destructive",
           });
         } else {
@@ -110,7 +110,7 @@ export default function Auth() {
             <Card variant="glass" className="p-8 relative overflow-hidden">
               {/* Decorative corner */}
               <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-primary/20 to-transparent rounded-bl-full" />
-              
+
               <div className="text-center mb-8 relative">
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 border border-primary/20 mb-4">
                   <Shield className="w-8 h-8 text-primary" />
@@ -125,18 +125,18 @@ export default function Auth() {
 
               <form onSubmit={handleSubmit} className="space-y-6 relative">
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="username">Username</Label>
                   <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    placeholder="admin@example.com"
-                    value={formData.email}
+                    id="username"
+                    name="username"
+                    type="text"
+                    placeholder="Enter your username"
+                    value={formData.username}
                     onChange={handleChange}
                     className="bg-card/60 border-border/50"
                   />
-                  {errors.email && (
-                    <p className="text-sm text-destructive">{errors.email}</p>
+                  {errors.username && (
+                    <p className="text-sm text-destructive">{errors.username}</p>
                   )}
                 </div>
 

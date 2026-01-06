@@ -1,20 +1,23 @@
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { ArrowRight, Sparkles, Award, Users, Camera, Pen, Layers, Palette, PenTool, Monitor } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { SectionHeader } from "@/components/ui/section-header";
-import branding1 from "@/assets/portfolio/branding-1.jpg";
-import social1 from "@/assets/portfolio/social-1.jpg";
-import print1 from "@/assets/portfolio/print-1.jpg";
-import ui1 from "@/assets/portfolio/ui-1.jpg";
+import { supabase } from "@/integrations/supabase/client";
 
-const featuredWorks = [
-  { id: 1, title: "Evroniere Wine", category: "Branding", image: branding1 },
-  { id: 2, title: "Social Media Campaign", category: "Social Media", image: social1 },
-  { id: 3, title: "Fashion Editorial", category: "Print", image: print1 },
-  { id: 4, title: "Dashboard UI", category: "UI/UX", image: ui1 },
-];
+interface FeaturedWork {
+  id: string;
+  title: string;
+  image_url: string;
+  category_id: string | null;
+}
+
+interface Category {
+  id: string;
+  name: string;
+}
 
 const stats = [
   { icon: Award, value: "150+", label: "Projects Completed" },
@@ -32,6 +35,30 @@ const designTools = [
 ];
 
 export default function Home() {
+  const [featuredWorks, setFeaturedWorks] = useState<FeaturedWork[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [worksResult, categoriesResult] = await Promise.all([
+          supabase.from("portfolio_works").select("*").eq("is_featured", true).limit(4),
+          supabase.from("portfolio_categories").select("*"),
+        ]);
+
+        if (worksResult.data) setFeaturedWorks(worksResult.data);
+        if (categoriesResult.data) setCategories(categoriesResult.data);
+      } catch (error) {
+        console.error("Error fetching featured works:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
   return (
     <Layout>
       {/* Hero Section */}
@@ -55,18 +82,18 @@ export default function Home() {
                 <Sparkles size={16} className="text-primary" />
                 <span className="text-sm font-medium text-foreground">Creative Design Studio</span>
               </div>
-              
+
               <h1 className="text-5xl md:text-6xl lg:text-7xl font-display font-bold text-foreground leading-[1.1] mb-8 animate-fade-in" style={{ animationDelay: "0.1s" }}>
                 Crafting{" "}
                 <span className="text-gradient">Digital</span>
                 <br />
                 <span className="text-gradient-secondary">Experiences</span>
               </h1>
-              
+
               <p className="text-lg md:text-xl text-muted-foreground max-w-lg mb-10 animate-fade-in" style={{ animationDelay: "0.2s" }}>
                 I transform ideas into stunning visual identities that captivate audiences and elevate brands to new heights.
               </p>
-              
+
               <div className="flex flex-col sm:flex-row items-start gap-4 animate-fade-in" style={{ animationDelay: "0.3s" }}>
                 <Button size="lg" asChild className="bg-gradient-to-r from-primary to-accent hover:opacity-90 transition-all duration-300 shadow-lg shadow-primary/25 group">
                   <Link to="/portfolio" className="flex items-center gap-2">
@@ -101,7 +128,7 @@ export default function Home() {
               <div className="relative">
                 {/* Decorative Ring */}
                 <div className="absolute -inset-4 rounded-full bg-gradient-to-r from-primary via-accent to-primary animate-spin-slow opacity-20" />
-                
+
                 {/* Profile Container */}
                 <div className="relative w-72 h-72 md:w-96 md:h-96 rounded-full glass-card overflow-hidden animate-morph border-2 border-primary/20">
                   {/* Placeholder for profile picture */}
@@ -158,26 +185,38 @@ export default function Home() {
           />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-16">
-            {featuredWorks.map((work, index) => (
-              <Link
-                key={work.id}
-                to="/portfolio"
-                className="group relative overflow-hidden rounded-2xl aspect-[4/3] hover-lift glass-card"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <img
-                  src={work.image}
-                  alt={work.title}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  loading="lazy"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="absolute bottom-0 left-0 right-0 p-8 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
-                  <span className="text-sm text-primary font-medium">{work.category}</span>
-                  <h3 className="text-2xl font-display font-bold text-foreground mt-1">{work.title}</h3>
-                </div>
-              </Link>
-            ))}
+            {isLoading ? (
+              [...Array(4)].map((_, i) => (
+                <div key={i} className="aspect-[4/3] rounded-2xl bg-card/60 animate-pulse border border-border/50" />
+              ))
+            ) : featuredWorks.length > 0 ? (
+              featuredWorks.map((work, index) => (
+                <Link
+                  key={work.id}
+                  to="/portfolio"
+                  className="group relative overflow-hidden rounded-2xl aspect-[4/3] hover-lift glass-card"
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                  <img
+                    src={work.image_url}
+                    alt={work.title}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="absolute bottom-0 left-0 right-0 p-8 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
+                    <span className="text-sm text-primary font-medium">
+                      {categories.find(c => c.id === work.category_id)?.name}
+                    </span>
+                    <h3 className="text-2xl font-display font-bold text-foreground mt-1">{work.title}</h3>
+                  </div>
+                </Link>
+              ))
+            ) : (
+              <div className="col-span-full py-12 text-center">
+                <p className="text-muted-foreground">No featured works yet.</p>
+              </div>
+            )}
           </div>
 
           <div className="text-center mt-12">
@@ -196,12 +235,12 @@ export default function Home() {
         <div className="absolute inset-0">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-primary/10 rounded-full blur-[200px]" />
         </div>
-        
+
         <div className="container mx-auto px-6 relative">
           <Card variant="glass" className="p-12 md:p-16 text-center max-w-4xl mx-auto relative overflow-hidden">
             <div className="absolute -top-20 -right-20 w-40 h-40 bg-primary/20 rounded-full blur-3xl" />
             <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-accent/20 rounded-full blur-3xl" />
-            
+
             <h2 className="text-3xl md:text-5xl font-display font-bold text-foreground mb-6 relative">
               Ready to Start Your{" "}
               <span className="text-gradient">Project?</span>

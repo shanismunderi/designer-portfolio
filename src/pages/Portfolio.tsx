@@ -1,38 +1,65 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { SectionHeader } from "@/components/ui/section-header";
 import { Lightbox } from "@/components/ui/lightbox";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
 
-import branding1 from "@/assets/portfolio/branding-1.jpg";
-import branding2 from "@/assets/portfolio/branding-2.jpg";
-import social1 from "@/assets/portfolio/social-1.jpg";
-import print1 from "@/assets/portfolio/print-1.jpg";
-import print2 from "@/assets/portfolio/print-2.jpg";
-import ui1 from "@/assets/portfolio/ui-1.jpg";
+interface Work {
+  id: string;
+  title: string;
+  description: string | null;
+  category_id: string | null;
+  image_url: string;
+  tags: string[];
+  is_featured: boolean;
+  sort_order: number;
+}
 
-const categories = ["All", "Branding", "UI/UX", "Print", "Social Media"];
-
-const portfolioItems = [
-  { id: 1, title: "Evroniere Wine Branding", category: "Branding", image: branding1, description: "Complete brand identity for luxury wine brand" },
-  { id: 2, title: "Premium Cosmetics", category: "Branding", image: branding2, description: "Elegant packaging design for skincare line" },
-  { id: 3, title: "Social Campaign", category: "Social Media", image: social1, description: "Vibrant social media marketing campaign" },
-  { id: 4, title: "Fashion Editorial", category: "Print", image: print1, description: "Magazine spread for luxury fashion brand" },
-  { id: 5, title: "Art Exhibition Poster", category: "Print", image: print2, description: "Bold geometric poster for gallery exhibition" },
-  { id: 6, title: "Analytics Dashboard", category: "UI/UX", image: ui1, description: "Modern dark theme dashboard interface" },
-];
+interface Category {
+  id: string;
+  name: string;
+}
 
 export default function Portfolio() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [works, setWorks] = useState<Work[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [worksResult, categoriesResult] = await Promise.all([
+          supabase.from("portfolio_works").select("*").order("sort_order"),
+          supabase.from("portfolio_categories").select("*").order("name"),
+        ]);
+
+        if (worksResult.data) setWorks(worksResult.data);
+        if (categoriesResult.data) setCategories(categoriesResult.data);
+      } catch (error) {
+        console.error("Error fetching portfolio data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const categoryNames = ["All", ...categories.map(c => c.name)];
 
   const filteredItems = activeCategory === "All"
-    ? portfolioItems
-    : portfolioItems.filter((item) => item.category === activeCategory);
+    ? works
+    : works.filter((item) => {
+        const category = categories.find(c => c.id === item.category_id);
+        return category?.name === activeCategory;
+      });
 
   const lightboxImages = filteredItems.map((item) => ({
-    src: item.image,
+    src: item.image_url,
     alt: item.title,
     title: item.title,
   }));
@@ -54,7 +81,7 @@ export default function Portfolio() {
 
           {/* Category Filter */}
           <div className="flex flex-wrap items-center justify-center gap-3 mt-12">
-            {categories.map((category) => (
+            {categoryNames.map((category) => (
               <button
                 key={category}
                 onClick={() => setActiveCategory(category)}
@@ -72,28 +99,41 @@ export default function Portfolio() {
 
           {/* Portfolio Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-16">
-            {filteredItems.map((item, index) => (
-              <article
-                key={item.id}
-                className="group relative overflow-hidden rounded-2xl bg-card/60 backdrop-blur-xl border border-border/50 hover-lift cursor-pointer"
-                onClick={() => openLightbox(index)}
-              >
-                <div className="aspect-square overflow-hidden">
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    loading="lazy"
-                  />
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="absolute bottom-0 left-0 right-0 p-6 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
-                  <span className="text-sm text-primary font-medium">{item.category}</span>
-                  <h3 className="text-xl font-display font-bold text-foreground mt-1">{item.title}</h3>
-                  <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{item.description}</p>
-                </div>
-              </article>
-            ))}
+            {isLoading ? (
+              // Loading Skeleton
+              [...Array(6)].map((_, i) => (
+                <div key={i} className="aspect-square rounded-2xl bg-card/60 backdrop-blur-xl border border-border/50 animate-pulse" />
+              ))
+            ) : filteredItems.length > 0 ? (
+              filteredItems.map((item, index) => (
+                <article
+                  key={item.id}
+                  className="group relative overflow-hidden rounded-2xl bg-card/60 backdrop-blur-xl border border-border/50 hover-lift cursor-pointer"
+                  onClick={() => openLightbox(index)}
+                >
+                  <div className="aspect-square overflow-hidden">
+                    <img
+                      src={item.image_url}
+                      alt={item.title}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      loading="lazy"
+                    />
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-background via-background/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="absolute bottom-0 left-0 right-0 p-6 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
+                    <span className="text-sm text-primary font-medium">
+                      {categories.find(c => c.id === item.category_id)?.name}
+                    </span>
+                    <h3 className="text-xl font-display font-bold text-foreground mt-1">{item.title}</h3>
+                    <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{item.description}</p>
+                  </div>
+                </article>
+              ))
+            ) : (
+              <div className="col-span-full py-24 text-center">
+                <p className="text-muted-foreground">No works found in this category.</p>
+              </div>
+            )}
           </div>
         </div>
       </section>

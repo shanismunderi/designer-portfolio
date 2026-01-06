@@ -62,7 +62,7 @@ export default function About() {
               </span>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-foreground leading-tight mb-6">
                 Hello, I'm{" "}
-                <span className="text-gradient">Alex Morgan</span>
+                <span className="text-gradient">Ziyan</span>
               </h1>
               <p className="text-xl text-muted-foreground mb-8">
                 A passionate graphic designer with over 8 years of experience crafting visual experiences that tell compelling stories and drive results.
@@ -83,12 +83,12 @@ export default function About() {
                 </Button>
               </div>
             </div>
-            
+
             <div className="relative">
               <Card variant="glass" className="p-8 relative z-10">
                 <div className="aspect-[4/5] rounded-xl overflow-hidden bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
                   <div className="text-center">
-                    <span className="text-8xl font-display font-bold text-gradient">AM</span>
+                    <span className="text-8xl font-display font-bold text-gradient">Z</span>
                     <p className="text-muted-foreground mt-4">Creative Designer</p>
                   </div>
                 </div>
@@ -165,13 +165,12 @@ export default function About() {
               {experience.map((exp, index) => (
                 <div
                   key={index}
-                  className={`relative flex flex-col md:flex-row gap-8 mb-12 ${
-                    index % 2 === 0 ? "md:flex-row-reverse" : ""
-                  }`}
+                  className={`relative flex flex-col md:flex-row gap-8 mb-12 ${index % 2 === 0 ? "md:flex-row-reverse" : ""
+                    }`}
                 >
                   {/* Dot */}
                   <div className="absolute left-0 md:left-1/2 w-4 h-4 bg-primary rounded-full transform -translate-x-1/2 md:-translate-x-1/2 shadow-glow" />
-                  
+
                   {/* Content */}
                   <div className={`md:w-1/2 pl-8 md:pl-0 ${index % 2 === 0 ? "md:pr-16 md:text-right" : "md:pl-16"}`}>
                     <Card variant="glass" className="p-6">
