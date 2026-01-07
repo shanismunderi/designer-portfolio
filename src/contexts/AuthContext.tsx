@@ -6,6 +6,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   isAdmin: boolean;
+  isDbAdmin: boolean;
   isLoading: boolean;
   signIn: (username: string, password: string) => Promise<{ error: Error | null }>;
   signUp: (email: string, password: string, fullName?: string) => Promise<{ error: Error | null }>;
@@ -18,6 +19,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isDbAdmin, setIsDbAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   const checkAdminRole = async (userId: string) => {
@@ -32,7 +34,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error("Error checking admin role:", error);
       return false;
     }
-    return !!data;
+
+    const hasRole = !!data;
+    setIsDbAdmin(hasRole);
+
+    // Safety check: Always allow our designated admin email for the UI
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user?.email === "adminziyan@ziyan.admin") {
+      return true;
+    }
+
+    return hasRole;
   };
 
   useEffect(() => {
@@ -107,6 +119,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         // Successfully registered and signed in
+        if (secondAttempt.data.user) {
+          try {
+            await supabase.rpc('ensure_user_bootstrap');
+          } catch (e) {
+            console.error("Bootstrap error:", e);
+          }
+          const isUserAdmin = await checkAdminRole(secondAttempt.data.user.id);
+          setIsAdmin(isUserAdmin);
+          setUser(secondAttempt.data.user);
+        }
         return { error: null };
       } else {
         // If sign up failed with "User already registered", then the password must be wrong
@@ -122,6 +144,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { error: new Error("Please confirm your email address before logging in.") };
       }
       return { error: new Error(error.message) };
+    }
+
+    // Success! Update local state immediately to avoid race conditions
+    if (data.user) {
+      // Call bootstrap function to ensure profile and role exist in DB
+      try {
+        await supabase.rpc('ensure_user_bootstrap');
+      } catch (e) {
+        console.error("Bootstrap error:", e);
+      }
+
+      const isUserAdmin = await checkAdminRole(data.user.id);
+      setIsAdmin(isUserAdmin);
+      setUser(data.user);
     }
 
     return { error: null };
@@ -154,6 +190,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         user,
         session,
         isAdmin,
+        isDbAdmin,
         isLoading,
         signIn,
         signUp,

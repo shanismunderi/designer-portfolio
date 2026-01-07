@@ -61,8 +61,8 @@ export default function About() {
                 About Me
               </span>
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-foreground leading-tight mb-6">
-                Hello, I'm{" "}
-                <span className="text-gradient">Ziyan</span>
+                Hello, I'm
+                <span className="text-gradient"> ZiyanZakariya</span>
               </h1>
               <p className="text-xl text-muted-foreground mb-8">
                 A passionate graphic designer with over 8 years of experience crafting visual experiences that tell compelling stories and drive results.
@@ -76,10 +76,6 @@ export default function About() {
                     Work With Me
                     <ArrowRight size={18} />
                   </Link>
-                </Button>
-                <Button variant="glass">
-                  <Download size={18} />
-                  Download Resume
                 </Button>
               </div>
             </div>

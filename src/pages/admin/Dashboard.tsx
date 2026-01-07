@@ -4,16 +4,18 @@ import { AdminLayout } from "@/components/admin/AdminLayout";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { 
-  Image, 
-  FolderOpen, 
-  Star, 
-  TrendingUp, 
-  Plus, 
+import { useAuth } from "@/contexts/AuthContext";
+import {
+  Image,
+  FolderOpen,
+  Star,
+  TrendingUp,
+  Plus,
   ExternalLink,
   Sparkles,
   BarChart3,
-  Eye
+  Eye,
+  Shield
 } from "lucide-react";
 
 interface RecentWork {
@@ -61,26 +63,26 @@ export default function AdminDashboard() {
   }, []);
 
   const statCards = [
-    { 
-      title: "Total Works", 
-      value: stats.totalWorks, 
-      icon: Image, 
+    {
+      title: "Total Works",
+      value: stats.totalWorks,
+      icon: Image,
       color: "from-blue-500/20 to-blue-600/20",
       iconColor: "text-blue-400",
       description: "Portfolio items"
     },
-    { 
-      title: "Featured Works", 
-      value: stats.featuredWorks, 
-      icon: Star, 
+    {
+      title: "Featured Works",
+      value: stats.featuredWorks,
+      icon: Star,
       color: "from-yellow-500/20 to-amber-500/20",
       iconColor: "text-yellow-400",
       description: "Highlighted projects"
     },
-    { 
-      title: "Categories", 
-      value: stats.categories, 
-      icon: FolderOpen, 
+    {
+      title: "Categories",
+      value: stats.categories,
+      icon: FolderOpen,
       color: "from-green-500/20 to-emerald-500/20",
       iconColor: "text-green-400",
       description: "Work categories"
@@ -124,9 +126,31 @@ export default function AdminDashboard() {
     },
   ];
 
+  const { isAdmin, isDbAdmin, user } = useAuth();
+  const isPermissionIssue = isAdmin && !isDbAdmin;
+
   return (
     <AdminLayout>
       <div className="space-y-8">
+        {/* Permission Warning */}
+        {isPermissionIssue && (
+          <div className="bg-destructive/10 border border-destructive/20 rounded-2xl p-6 text-destructive flex flex-col md:flex-row items-center gap-6 animate-fade-in">
+            <Shield className="h-12 w-12 flex-shrink-0" />
+            <div className="flex-1 text-center md:text-left">
+              <h3 className="text-xl font-bold mb-1">Database Permission Issue Detected</h3>
+              <p className="text-muted-foreground mb-4">
+                You are logged in as the admin, but your account is missing the database role required to save works.
+              </p>
+              <div className="bg-background/50 p-4 rounded-xl border border-destructive/10 font-mono text-xs text-foreground/80 mb-4 select-all">
+                INSERT INTO public.user_roles (user_id, role) VALUES ('{user?.id}', 'admin') ON CONFLICT DO NOTHING;
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Copy the code above and run it in your <strong>Supabase SQL Editor</strong> to fix this instantly.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
@@ -138,20 +162,36 @@ export default function AdminDashboard() {
               Welcome back! Here's an overview of your portfolio.
             </p>
           </div>
-          <Button variant="gold" asChild>
-            <Link to="/admin/works" className="flex items-center gap-2">
-              <Plus size={18} />
-              Add New Work
-            </Link>
-          </Button>
+          <div className="flex gap-3">
+            <Button variant="outline" onClick={async () => {
+              try {
+                const { error } = await supabase.rpc('ensure_user_bootstrap');
+                if (error) throw error;
+                alert("Database permissions synchronized successfully!");
+                window.location.reload();
+              } catch (e) {
+                console.error(e);
+                alert("Failed to synchronize permissions. Please check the Supabase SQL editor.");
+              }
+            }} className="glass border-primary/20 text-primary">
+              <Shield className="mr-2 h-4 w-4" />
+              Fix Permissions
+            </Button>
+            <Button variant="gold" asChild>
+              <Link to="/admin/works" className="flex items-center gap-2">
+                <Plus size={18} />
+                Add New Work
+              </Link>
+            </Button>
+          </div>
         </div>
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {statCards.map((stat, index) => (
-            <Card 
-              key={index} 
-              variant="glass" 
+            <Card
+              key={index}
+              variant="glass"
               className="relative overflow-hidden group hover:border-primary/30 transition-all duration-300"
             >
               <div className={`absolute inset-0 bg-gradient-to-br ${stat.color} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
@@ -290,7 +330,7 @@ export default function AdminDashboard() {
               <div className="flex-1">
                 <h3 className="font-display font-semibold text-foreground">Pro Tip</h3>
                 <p className="text-muted-foreground mt-1">
-                  Feature your best works to showcase them prominently on your portfolio homepage. 
+                  Feature your best works to showcase them prominently on your portfolio homepage.
                   Featured works appear in the hero carousel and get more visibility.
                 </p>
               </div>
