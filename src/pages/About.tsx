@@ -65,10 +65,10 @@ export default function About() {
                 <span className="text-gradient"> ZiyanZakariya</span>
               </h1>
               <p className="text-xl text-muted-foreground mb-8">
-                A passionate graphic designer with over 8 years of experience crafting visual experiences that tell compelling stories and drive results.
+                A graphic designer specializing in poster making, magazine design, and visual storytelling.
               </p>
               <p className="text-muted-foreground mb-8">
-                I believe design is more than aesthetics—it's about solving problems and creating meaningful connections between brands and their audiences. My approach combines strategic thinking with creative execution to deliver designs that not only look stunning but also achieve business objectives.
+                I believe design is more than aesthetics—it's about solving problems and creating meaningful connections between brands and their audiences. Based in Poduvachery, I bring creative vision to every project I undertake.
               </p>
               <div className="flex flex-wrap gap-4">
                 <Button variant="gold" asChild>

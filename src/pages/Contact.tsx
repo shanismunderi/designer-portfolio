@@ -214,7 +214,7 @@ export default function Contact() {
                 <div className="flex flex-wrap gap-3">
                   <Button variant="glass" size="sm" asChild>
                     <a
-                      href={`https://wa.me/15551234567?text=${encodeURIComponent("Hi! I'm interested in your design services.")}`}
+                      href={`https://wa.me/919400210747?text=${encodeURIComponent("Hi! I'm interested in your design services.")}`}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
@@ -222,8 +222,8 @@ export default function Contact() {
                     </a>
                   </Button>
                   <Button variant="glass" size="sm" asChild>
-                    <a href="mailto:hello@studio.design">
-                      Email
+                    <a href="tel:+919400210747">
+                      Call
                     </a>
                   </Button>
                 </div>

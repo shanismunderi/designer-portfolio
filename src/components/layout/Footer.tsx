@@ -92,11 +92,11 @@ export function Footer() {
             © {new Date().getFullYear()} Studio. All rights reserved.
           </p>
           <a
-            href="mailto:hello@studio.design"
+            href="tel:+919400210747"
             className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors duration-300"
           >
-            <Mail size={16} />
-            hello@studio.design
+            <Phone size={16} />
+            +91 9400210747
           </a>
         </div>
       </div>
