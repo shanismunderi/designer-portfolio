@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, Phone, MapPin, Send, Instagram, Twitter, Linkedin, Dribbble } from "lucide-react";
+import { Mail, Phone, MapPin, Send, Instagram } from "lucide-react";
 import { z } from "zod";
 
 const contactSchema = z.object({
@@ -18,16 +18,12 @@ const contactSchema = z.object({
 });
 
 const contactInfo = [
-  { icon: Mail, label: "Email", value: "hello@studio.design", href: "mailto:hello@studio.design" },
-  { icon: Phone, label: "Phone", value: "+1 (555) 123-4567", href: "tel:+15551234567" },
-  { icon: MapPin, label: "Location", value: "New York, NY", href: "#" },
+  { icon: Phone, label: "Phone", value: "+91 9400210747", href: "tel:+919400210747" },
+  { icon: MapPin, label: "Location", value: "Raza Manzil, Poduvachery, PO Poduvachery", href: "#" },
 ];
 
 const socialLinks = [
-  { icon: Instagram, href: "#", label: "Instagram" },
-  { icon: Twitter, href: "#", label: "Twitter" },
-  { icon: Linkedin, href: "#", label: "LinkedIn" },
-  { icon: Dribbble, href: "#", label: "Dribbble" },
+  { icon: Instagram, href: "https://www.instagram.com/ziyan.zakariya", label: "Instagram" },
 ];
 
 export default function Contact() {
@@ -218,7 +214,7 @@ export default function Contact() {
                 <div className="flex flex-wrap gap-3">
                   <Button variant="glass" size="sm" asChild>
                     <a
-                      href={`https://wa.me/15551234567?text=${encodeURIComponent("Hi! I'm interested in your design services.")}`}
+                      href={`https://wa.me/919400210747?text=${encodeURIComponent("Hi! I'm interested in your design services.")}`}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
@@ -226,8 +222,8 @@ export default function Contact() {
                     </a>
                   </Button>
                   <Button variant="glass" size="sm" asChild>
-                    <a href="mailto:hello@studio.design">
-                      Email
+                    <a href="tel:+919400210747">
+                      Call
                     </a>
                   </Button>
                 </div>
