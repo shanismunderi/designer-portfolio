@@ -39,8 +39,18 @@ export function Footer() {
               Studio.
             </Link>
             <p className="mt-4 text-muted-foreground max-w-sm">
-              Crafting visual experiences that captivate, inspire, and elevate brands to new heights.
+              Graphic designer specializing in poster making, magazine design, and visual storytelling.
             </p>
+            <div className="mt-4 space-y-2 text-sm text-muted-foreground">
+              <a href="tel:+919400210747" className="flex items-center gap-2 hover:text-primary transition-colors">
+                <Phone size={14} />
+                +91 9400210747
+              </a>
+              <div className="flex items-center gap-2">
+                <MapPin size={14} />
+                Raza Manzil, Poduvachery, PO Poduvachery
+              </div>
+            </div>
             <div className="flex items-center gap-4 mt-6">
               {socialLinks.map((social) => (
                 <a
