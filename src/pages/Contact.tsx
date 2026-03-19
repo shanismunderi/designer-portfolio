@@ -18,16 +18,12 @@ const contactSchema = z.object({
 });
 
 const contactInfo = [
-  { icon: Mail, label: "Email", value: "hello@studio.design", href: "mailto:hello@studio.design" },
-  { icon: Phone, label: "Phone", value: "+1 (555) 123-4567", href: "tel:+15551234567" },
-  { icon: MapPin, label: "Location", value: "New York, NY", href: "#" },
+  { icon: Phone, label: "Phone", value: "+91 9400210747", href: "tel:+919400210747" },
+  { icon: MapPin, label: "Location", value: "Raza Manzil, Poduvachery, PO Poduvachery", href: "#" },
 ];
 
 const socialLinks = [
-  { icon: Instagram, href: "#", label: "Instagram" },
-  { icon: Twitter, href: "#", label: "Twitter" },
-  { icon: Linkedin, href: "#", label: "LinkedIn" },
-  { icon: Dribbble, href: "#", label: "Dribbble" },
+  { icon: Instagram, href: "https://www.instagram.com/ziyan.zakariya", label: "Instagram" },
 ];
 
 export default function Contact() {
